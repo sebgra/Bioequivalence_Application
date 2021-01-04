@@ -1,0 +1,547 @@
+---
+title: "`r input$Title `"
+author: "`r input$Author `"
+date: "`r Sys.Date()`"
+
+always_allow_html: yes
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    smart: false
+
+---
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+
+<style type="text/css">
+
+h1.title {
+  font-size: 38px;
+  color: #001E7E;
+  text-align: center;
+}
+h4.author { /* Header 4 - and the author and data headers use this too  */
+    font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: #001E7E;
+  text-align: center;
+}
+h4.date { /* Header 4 - and the author and data headers use this too  */
+  font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+  text-align: center;
+}
+</style>
+
+
+
+```{r setup, include=FALSE, fig.align='center'}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Subjects Disposition 
+
+<center>
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+# filedata_DS() %>% select(DSDECOD) %>% ds_auto_freq_table()
+table_1()
+
+```
+
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE, results='asis'}
+# filedata_DS() %>% select(DSDECOD) %>% ds_auto_freq_table()
+knit_print(table_0())
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+
+# Descriptive Statistics of demographic data
+
+<center>
+
+
+```{r pressure, echo=FALSE, fig.align='center', warning=FALSE}
+# demographic_characteristics() %>% ds_summary_stats()
+
+table_2()
+```
+
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+# Duration Descriptive Statistics
+
+<center>
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+# durations()%>% ds_summary_stats()
+
+table_3()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+# Age Statistics
+
+<center>
+
+
+```{r, echo=FALSE, warning=FALSE}
+
+# age() %>% ds_summary_stats()
+
+table_4()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+
+# Area Under Curve Statistics by technic
+
+<center>
+
+
+```{r, echo=FALSE, warning=FALSE}
+# df.AUC() %>% group_by(as.factor(visit)) %>% select(iAUCS) %>% ds_summary_stats()
+
+# options(width = 2000)
+
+# df.AUC() %>% ds_auto_group_summary()
+
+table_5()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+
+
+
+# Distribution of iAUC values by visit
+
+<center>
+
+
+
+```{r, echo=FALSE, warning=FALSE}
+
+ggplot(data = df.AUC(), aes(y = iAUCS, fill = as.factor(VISITNUM))) + geom_boxplot()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+# iAUC Outliers
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+library(DT)
+datatable(df.Outliers(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2)))
+
+
+)
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+# Histogram by visit
+
+<center>
+
+
+
+```{r, echo=FALSE, warning=FALSE}
+
+ggplot(data = df.AUC(), aes(x = iAUCS)) + geom_histogram( binwidth = 25000,colour = "black", fill = "white")  + geom_density(aes(y=25000 * ..count..),color="darkblue", fill="lightblue", alpha = 0.2)  + facet_grid(VISITNUM ~ ., labeller = label_both)
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Title 
+
+<center>
+
+
+
+```{r, echo=FALSE, warning=FALSE}
+
+
+ggplot(data = df.AUC(), aes(x = VISITNUM, y = iAUCS, group = USUBJID)) + geom_line() + aes(colour = factor(USUBJID))
+
+```
+
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Overall 
+
+<center>
+
+
+
+
+```{r, echo = FALSE, error=FALSE, warning=FALSE}
+
+# summarytools::freq(df.AUC()$visit)
+
+table_6()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Overall bar plot of percentage of non missing observations - Bar plot by visit
+
+<center>
+
+
+
+```{r,echo=FALSE, warning=FALSE}
+
+ggplot(data=df.missing_data(), aes(x=as.factor(VISITNUM))) + geom_bar(aes(y = (..count..)/sum(..count..)), group = 1) + ggtitle("Percentage of non missing iAUCs per visit")
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Total sum of the amount of the eAA (pmol) at each timepoint - Summary
+
+<center>
+
+
+
+```{r, echo=FALSE, results = "asis" , warning=FALSE }
+library(table1)
+library(knitr)
+knit_print(table_7())
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+
+# Total sum of the amount of the biomarker at each point
+
+<center>
+
+
+
+```{r,echo = FALSE, results='asis', warning=FALSE}
+
+cat("<style>
+caption {
+      color: blue;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+</style>")
+
+results <- character()
+
+
+
+df_split <- split(df.to_exploit_with_sum(), df.to_exploit_with_sum()$VISITNUM)
+
+
+
+visites <- levels( df.to_exploit_with_sum())
+
+
+
+
+for (i in 1:length(df_split)) {
+
+
+  tb <- table1(~EAASUM, data = df_split[[i]],render.continuous=c("Missing Values" = "NMISS","Mean - SD (CV%)"="Mean - SD (CV%)", .="Median [Min, Max]",
+                                                                                           "Geo. mean (Geo. CV%)"="GMEAN (GCV%)", . = "Q1 ; Q3 (IQR)") ,topclass="Rtable1-zebra")
+
+  results <- c(results, "Visit : ", names(df_split)[i], tb)
+}
+
+asis_output(results)
+
+
+
+ 
+ 
+
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+<center>
+
+
+```{r, echo = FALSE, out.width = '100%', warning=FALSE}
+
+ggplot(data = df.to_exploit_with_sum(), aes(y = EAASUM, group = VISITNUM)) + geom_boxplot() + facet_wrap(LBTPTNUM ~ ., labeller = label_both, scales = "free")
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+<center>
+
+
+```{r, echo = FALSE, out.width = '100%', warning=FALSE}
+
+ggplot(data = df.to_exploit_with_sum(), aes(x = EAASUM)) + geom_histogram( binwidth = 250,colour = "black", fill = "white")  + geom_density(aes(y=250 * ..count..),color="darkblue", fill="lightblue", alpha = 0.2)  + facet_grid(VISITNUM ~ LBTPTNUM, labeller = label_both, scales = "free") + theme(axis.text.x = element_text(angle = 90, hjust = 1), strip.text.x = element_text(
+        size = 5))
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Total sum of the amount of the eAA (pmol) at each timepoint  - Listing of outliers
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+
+datatable(df.full_outliers(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2)))
+
+
+)
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint: Summary
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+
+table_8()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+
+# Secondary endpoint: Boxplot by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+
+ggplot(data = df.AUC_secondary(), aes(y = iAUCS, fill = as.factor(VISITNUM))) + geom_boxplot()+ scale_fill_brewer(palette = "Dark2")
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint: Listing of outliers
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+datatable(df.Outliers_secondary(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint: Histogram by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+ggplot(data = df.AUC_secondary(), aes(x = iAUCS)) + geom_histogram( binwidth = 25000,colour = "black", fill = "white")  + geom_density(aes(y=25000 * ..count..),color="darkblue", fill="lightblue", alpha = 0.2)  + facet_grid(VISITNUM ~ ., labeller = label_both)
+
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+#  Secondary endpoint: Spaghetti plot by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+
+ggplot(data = df.AUC_secondary(), aes(x = VISITNUM, y = iAUCS, group = USUBJID)) + geom_line() + aes(colour = factor(USUBJID))
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : C  Max observed over the experiment period - Summary
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+
+table_9()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : C  Max observed over the experiment period - Boxplot by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+
+ggplot(data = df.third_endpoint(), aes(y = Cmax, fill = as.factor(VISITNUM))) + geom_boxplot()+ scale_fill_brewer(palette = "Dark2")
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : C  Max observed over the experiment period - Listing of outliers
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+datatable(df.Cmax_outliers(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+
+
+
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : C  Max observed over the experiment period - Spaghetti plot by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+ggplot(data = df.third_endpoint(), aes(x = VISITNUM, y = Cmax, group = USUBJID)) + geom_line() + aes(colour = factor(USUBJID))
+
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : T  Max observed over the experiment period - Spaghetti plot by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+table_10()
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : T  Max observed over the experiment period - Boxplot plot by visit
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+ggplot(data = df.third_endpoint(), aes(y = Tmax, fill = as.factor(VISITNUM))) + geom_boxplot()+ scale_fill_brewer(palette = "Dark2")
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+# Secondary endpoint : T  Max observed over the experiment period - List of outliers
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+datatable(df.Tmax_outliers(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+
+```
+<p style="page-break-after: always;">&nbsp;</p>
+<p style="page-break-before: always;">&nbsp;</p>
+
+
+# Secondary endpoint : T  Max observed over the experiment period - Spaghetti plot by visit 
+
+<center>
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+ggplot(data = df.third_endpoint(), aes(x = VISITNUM, y = Tmax, group = USUBJID)) + geom_line() + aes(colour = factor(USUBJID))
+
+```
+
+
+

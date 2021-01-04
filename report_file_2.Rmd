@@ -1,0 +1,527 @@
+---
+title: "`r input$Title `"
+author: "`r input$Author `"
+date: "`r Sys.Date()`"
+
+always_allow_html: yes
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    smart: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+
+
+<style type="text/css">
+
+h1.title {
+  font-size: 38px;
+  color: #001E7E;
+  text-align: center;
+}
+h4.author { /* Header 4 - and the author and data headers use this too  */
+    font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: #001E7E;
+  text-align: center;
+}
+h4.date { /* Header 4 - and the author and data headers use this too  */
+  font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+  text-align: center;
+}
+</style>
+
+# Demographic characteristics at Baseline
+
+<center>
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+# filedata_DS() %>% select(DSDECOD) %>% ds_auto_freq_table()
+table_1_2()
+
+table_2_2()
+
+table_3_2()
+
+```
+
+
+
+# Sequence-by-period AUC statistics
+
+<center>
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+# filedata_DS() %>% select(DSDECOD) %>% ds_auto_freq_table()
+
+
+#table_4_2() #######################
+
+
+cat("<style>
+caption {
+      color: blue;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+</style>")
+
+visites_2 = unique(AUC_by_ID()$VISITNUM)
+
+
+results <- character()
+
+
+
+df_split <- split(AUC_by_ID(), AUC_by_ID()$VISITNUM)
+
+
+
+# visites <- levels( df.to_exploit_with_sum())
+
+
+
+
+for (i in 1:length(df_split)) {
+
+
+  tb <- table1(~. |TRTSEQP, data = df_split[[i]],render.continuous=c("Missing Values" = "NMISS","Mean - SD (CV%)"="Mean - SD (CV%)", .="Median [Min, Max]",
+                                                                                           "Geo. mean (Geo. CV%)"="GMEAN (GCV%)", . = "Q1 ; Q3 (IQR)") ,topclass="Rtable1-zebra")
+
+  results <- c(results, "Visit : ", names(df_split)[i], tb)
+}
+
+asis_output(results)
+
+
+```
+
+# Primary Endpoint statistics by product
+
+<center>
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+# filedata_DS() %>% select(DSDECOD) %>% ds_auto_freq_table()
+table_5_2()
+
+
+
+
+```
+
+# Primary endpoint: sequence-by-period subject profile plots AUC
+
+<center>
+
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+# filedata_DS() %>% select(DSDECOD) %>% ds_auto_freq_table()
+
+ggplot(data = dft(), aes(x = VISITNUM, y = LOG, group = USUBJID )) + geom_line() + aes(colour = USUBJID) + facet_grid(TRTSEQP ~ ., labeller = label_both) + ggtitle(" Primary endpoint: sequence-by-period subject profile plots of total sum of plasma essential Amino Acids (eAA) incremental Area Under the Curve")
+
+```
+
+# Primary endpoint: Ratios Test to Control geometric LSmeans and 90% CI and by sequence individual ratios of Test to Control
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+
+ggplot(data = ratios_table_gathered(), aes(x = Ratio, y = ratio_value, ylim(0,4), size=2)) +  
+      geom_jitter( width = 0.25, height = 0.05,aes( shape = factor(TRTSEQP)) ) + ggtitle(" Primary endpoint: Ratios Test to Control geometric LSmeans and 90% CI and by sequence individual ratios of Test to Control")   + scale_y_continuous(breaks = round(seq(min(ratios_table_gathered()$ratio_value), max(ratios_table_gathered()$ratio_value), by = 0.5),1))+  geom_hline(yintercept=0.8, linetype="dashed", 
+                                                                                                                                                                                                                                        color = "red", size=0.8) +  geom_hline(yintercept=1.25, linetype="dashed", 
+                                                                                                                                                                                                                                                                               color = "red", size=0.8) + geom_point(data = CI(), aes(x = Ratio , y = Geometric_Mean ), size= 1, color="red") + geom_segment(data = CI(), aes( x = Ratio,y = Lower_Limit, xend = Ratio, yend = Upper_Limit, group = Ratio, color = "green", size = .4, linetype = "dashed" ))
+
+```
+
+
+# Primary endpoint: mean and 95% CI study product profiles of total sum of plasma essential Amino Acids (eAA)
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+ggplot(data = CI_spag(), aes(x = LBTPTNUM, y = mean)) + geom_line(aes(color = factor(TRTSEQP))) + facet_grid(VISITNUM~ TRTSEQP , labeller = label_both)  + geom_errorbar(aes(ymin=lower, ymax=upper), width=.2,
+                                                                                                                                                                                                           position=position_dodge(.1)) + ggtitle(" Primary endpoint: mean and 95% CI study product profiles of total sum of plasma essential Amino Acids ")
+
+```
+
+
+# Primary endpoint: Estimate of the analysis of variance (ANOVA) model
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+datatable(anova_result(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+table_6_2()
+
+plot(model(), main = "Conditional Standardized Residuals ")
+
+qqnorm(model(), ~ resid(., type = "p"), abline = c(0, 1), main = "Conditional Standardized Residuals ")
+
+hist(resid(model(), type = "pearson"), main = "Conditional Pearsoned Residuals ", xlab = "Pearsoned Residuals")
+
+
+
+```
+
+# Sequence-by-period AUC statistics
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+
+table_7_2()
+
+
+cat("<style>
+caption {
+      color: blue;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+</style>")
+
+visites_2 = unique(AUC_by_ID_secondary()$VISITNUM)
+
+
+results <- character()
+
+
+
+df_split <- split(AUC_by_ID_secondary(), AUC_by_ID_secondary()$VISITNUM)
+
+
+
+# visites <- levels( df.to_exploit_with_sum())
+
+
+
+
+for (i in 1:length(df_split)) {
+
+
+  tb <- table1(~. |TRTSEQP, data = df_split[[i]],render.continuous=c("Missing Values" = "NMISS","Mean - SD (CV%)"="Mean - SD (CV%)", .="Median [Min, Max]",
+                                                                                           "Geo. mean (Geo. CV%)"="GMEAN (GCV%)", . = "Q1 ; Q3 (IQR)") ,topclass="Rtable1-zebra")
+
+  results <- c(results, "Visit : ", names(df_split)[i], tb)
+}
+
+asis_output(results)
+
+
+
+
+
+
+
+```
+
+# Secondary Endpoint statistics by product
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+
+table_8_2()
+
+
+```
+
+# Secondary endpoint: sequence-by-period subject profile plots AUC
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+
+ggplot(data = dft_secondary(), aes(x = VISITNUM, y = LOG, group = USUBJID )) + geom_line() + aes(colour = factor(USUBJID)) + facet_grid(TRTSEQP ~ ., labeller = label_both) + ggtitle(" Secondary endpoint: sequence-by-period subject profile plots of Leucine Concentration incremental Area Under the Curve")
+
+
+
+
+```
+
+# Secondary endpoint: Ratios Test to Control geometric LSmeans and 90% CI and by sequence individual ratios of Test to Control
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+
+ggplot(data = ratios_table_gathered_secondary(), aes(x = Ratio, y = ratio_value, ylim(0,4), size=2)) +  
+      geom_jitter( width = 0.25, height = 0.05,aes( shape = factor(TRTSEQP)) ) + ggtitle(" Secondary endpoint Leucine Concentration incremental Area Under the Curve: Ratios Test to Control geometric LSmeans and 90% CI and by sequence individual ratios of Test to Control")   + scale_y_continuous(breaks = round(seq(min(ratios_table_gathered_secondary()$ratio_value), max(ratios_table_gathered_secondary()$ratio_value), by = 0.5),1))+  geom_hline(yintercept=0.8, linetype="dashed", 
+                                                                                                                                                                                                                                                            color = "red", size=0.8) +  geom_hline(yintercept=1.25, linetype="dashed", 
+                                                                                                                                                                                                                                                                                                   color = "red", size=0.8) + geom_point(data = CI_secondary(), aes(x = Ratio , y = Geometric_Mean ), size= 1, color="red") + geom_segment(data = CI_secondary(), aes( x = Ratio,y = Lower_Limit, xend = Ratio, yend = Upper_Limit, group = Ratio, color = "green", size = .4, linetype = "dashed" ))
+    
+    
+
+
+
+
+```
+
+# Secondary endpoint: mean and 95% CI study product profiles of Leucine Concentration
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+
+ggplot(data = CI_spag_secondary(), aes(x = LBTPTNUM, y = mean)) + geom_line(aes(color = factor(TRTSEQP))) + facet_grid(VISITNUM~ TRTSEQP , labeller = label_both)  + geom_errorbar(aes(ymin=lower, ymax=upper), width=.2,
+                                                                                                                                                                                                                         position=position_dodge(.1)) + ggtitle(" Secondary endpoint: mean and 95% CI study product profiles of Leucine Concentration incremental Area Under the Curve")
+
+
+
+
+```
+
+# Secondary endpoint: Estimate of the analysis of variance (ANOVA) model
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+datatable(anova_result_secondary(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+
+
+plot(model_secondary(), main = "Conditional Standardized Residuals ")
+
+qqnorm(model_secondary(), ~ resid(., type = "p"), abline = c(0, 1), main = "Conditional Standardized Residuals ")
+
+hist(resid(model_secondary(), type = "pearson"), main = "Conditional Pearsoned Residuals ", xlab = "Pearsoned Residuals")
+
+
+
+```
+
+# Sequence-by-period Tmax statistics
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+table_10_2()
+
+
+cat("<style>
+caption {
+      color: blue;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+</style>")
+
+visites_2 = unique(df_anotated_third()$VISITNUM)
+
+
+results <- character()
+
+
+
+df_split <- split(df_anotated_third(), df_anotated_third()$VISITNUM)
+
+
+
+# visites <- levels( df.to_exploit_with_sum())
+
+
+
+
+for (i in 1:length(df_split)) {
+
+
+  tb <- table1(~. |TRTSEQP, data = df_split[[i]],render.continuous=c("Missing Values" = "NMISS","Mean - SD (CV%)"="Mean - SD (CV%)", .="Median [Min, Max]",
+                                                                                           "Geo. mean (Geo. CV%)"="GMEAN (GCV%)", . = "Q1 ; Q3 (IQR)") ,topclass="Rtable1-zebra")
+
+  results <- c(results, "Visit : ", names(df_split)[i], tb)
+}
+
+asis_output(results)
+
+
+
+
+
+
+
+```
+
+# Secondary Endpoint Tmax statistics by product
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+table_11_2()
+
+
+```
+
+# Secondary Endpoint Cmax statistics by product
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+table_12_2()
+
+
+
+```
+
+# Secondary Endpoint by product and timepoint statistics
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+table_13_2()
+
+cat("<style>
+caption {
+      color: blue;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+</style>")
+
+visites_2 = unique(detailed_concentrations_by_timepoint_and_subject_secondary()$VISITNUM)
+
+
+results <- character()
+
+
+
+df_split <- split(detailed_concentrations_by_timepoint_and_subject_secondary(), detailed_concentrations_by_timepoint_and_subject_secondary()$LBTPTNUM)
+
+
+
+# visites <- levels( df.to_exploit_with_sum())
+
+
+
+
+for (i in 1:length(df_split)) {
+
+
+  tb <- table1(~SUM |produit, data = df_split[[i]],render.continuous=c("Missing Values" = "NMISS","Mean - SD (CV%)"="Mean - SD (CV%)", .="Median [Min, Max]",
+                                                                                           "Geo. mean (Geo. CV%)"="GMEAN (GCV%)", . = "Q1 ; Q3 (IQR)") ,topclass="Rtable1-zebra")
+
+  results <- c(results, "Timepoint : ", names(df_split)[i], tb)
+}
+
+asis_output(results)
+
+
+
+
+
+```
+
+# Secondary endpoint: sequence-by-period subject profile plots Cmax
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+ggplot(data = dft_third(), aes(x = VISITNUM, y = LOG, group = USUBJID )) + geom_line() + aes(colour = factor(USUBJID)) + facet_grid(TRTSEQP ~ ., labeller = label_both) + ggtitle(" Secondary endpoint: sequence-by-period subject profile plots of  Cmax observed (?mol/L) over 4 hours")
+
+
+```
+
+# Secondary endpoint Cmax: Ratios Test to Control geometric LSmeans and 90% CI and by sequence individual ratios of Test to Control
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+
+ggplot(data = ratios_table_gathered_third_Cmax(), aes(x = Ratio, y = ratio_value, ylim(0,4), size=2)) +  
+      geom_jitter( width = 0.25, height = 0.05,aes( shape = factor(TRTSEQP)) ) + ggtitle("Secondary endpoint Cmax observed: Ratios Test to Control geometric LSmeans, 90% CI & by sequence individual ratios of Test to Control")  + scale_y_continuous(breaks = round(seq(min(ratios_table_gathered_third_Cmax()$ratio_value), max(ratios_table_gathered_third_Cmax()$ratio_value), by = 0.5),1))+  geom_hline(yintercept=0.8, linetype="dashed", 
+                                                                                                                                                                                                                                                              color = "red", size=0.8) +  geom_hline(yintercept=1.25, linetype="dashed", 
+                                                                                                                                                                                                                                                                                                     color = "red", size=0.8) + geom_point(data = CI_third_Cmax(), aes(x = Ratio , y = Geometric_Mean ), size= 1, color="red") + geom_segment(data = CI_third_Cmax(), aes( x = Ratio,y = Lower_Limit, xend = Ratio, yend = Upper_Limit, group = Ratio, color = "green", size = .4, linetype = "dashed" ))
+
+```
+
+
+# Secondary endpoint: Estimate of the analysis of variance (ANOVA) model - Cmax
+
+
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+datatable(anova_result_third_Cmax(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+
+
+plot(model_third_Cmax(), main = "Conditional Standardized Residuals ")
+
+qqnorm(model_third_Cmax(), ~ resid(., type = "p"), abline = c(0, 1), main = "Conditional Standardized Residuals ")
+
+hist(resid(model_third_Cmax(), type = "pearson"), main = "Conditional Pearsoned Residuals ", xlab = "Pearsoned Residuals")
+
+
+
+```
+
+
+# Secondary endpoint: Estimate of the analysis of variance (ANOVA) model - Tmax
+
+<center>
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
+
+datatable(anova_result_third_Tmax(),rownames=FALSE, options = list(dom='t',ordering=F,columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+
+
+
+plot(model_third_Tmax(), main = "Conditional Standardized Residuals ")
+
+qqnorm(model_third_Tmax(), ~ resid(., type = "p"), abline = c(0, 1), main = "Conditional Standardized Residuals ")
+
+hist(resid(model_third_Tmax(), type = "pearson"), main = "Conditional Pearsoned Residuals ", xlab = "Pearsoned Residuals")
+
+
+
+```
